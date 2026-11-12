@@ -1,0 +1,27 @@
+{
+  "phase": "mixed",
+  "addresses": "10.41.0.0/16",
+  "capture": "tcpdump: verbose output suppressed, use -v[v]... for full protocol decode\nlistening on h2-eth0, link-type EN10MB (Ethernet), snapshot length 262144 bytes\n15:39:03.888155 00:00:00:00:00:01 > ff:ff:ff:ff:ff:ff, ethertype Unknown (0x1212), length 52: \n\t0x0000:  ffff ffff ffff 0000 0000 0001 1212 0800  ................\n\t0x0010:  0002 0745 0000 2100 0100 0040 0d66 760a  ...E..!....@.fv.\n\t0x0020:  2900 010a 2900 0310 e110 e100 0d7f ed6d  )...)..........m\n\t0x0030:  6978 6564                                ixed\n1 packet captured\n1 packet received by filter\n0 packets dropped by kernel\n",
+  "receivers": {
+    "h2": "Listening on h2-eth0...\n",
+    "h3": "Listening on h3-eth0...\n"
+  },
+  "loop": {
+    "baseline": {
+      "s1": 1,
+      "s2": 1
+    },
+    "first": {
+      "s1": 9,
+      "s2": 8
+    },
+    "second": {
+      "s1": 9,
+      "s2": 8
+    },
+    "delta": {
+      "s1": 8,
+      "s2": 7
+    }
+  }
+}
