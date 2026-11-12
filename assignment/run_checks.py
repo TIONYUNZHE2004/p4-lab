@@ -238,6 +238,14 @@ def make_report(student_id):
     template = (ROOT / 'assignment' / 'REPORT_TEMPLATE.md').read_text()
     replacements = {
         '@@ID@@': student_id,
+        '@@OLD_S1_FIRST@@': str(old['first']['s1']),
+        '@@OLD_S1_SECOND@@': str(old['second']['s1']),
+        '@@OLD_S2_FIRST@@': str(old['first']['s2']),
+        '@@OLD_S2_SECOND@@': str(old['second']['s2']),
+        '@@NEW_S1@@': str(new['delta']['s1']),
+        '@@NEW_S2@@': str(new['delta']['s2']),
+        '@@MIXED_S1@@': str(mixed['delta']['s1']),
+        '@@MIXED_S2@@': str(mixed['delta']['s2']),
         '@@OLD_FIRST@@': json.dumps(old['first']),
         '@@OLD_SECOND@@': json.dumps(old['second']),
         '@@NEW_COUNTS@@': json.dumps(new['delta']),
