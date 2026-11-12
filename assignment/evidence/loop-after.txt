@@ -1,0 +1,165 @@
+UTC: 2026-11-12T15:38:40.894158+00:00
+Student ID suffix: 4941
+tunnel.p4 sha256: 12af576d80148e4207f5cb5d244f6169e091022fe8a2685c381c36b487a040f6
+tunnel_v1.p4 sha256: 8cb86238da849f4feb7e006eabc3a12f068ca5404c645f793a5b8678b4e04770
+send.py sha256: 6ad47a58cbe6f44d180a2523973b80fed55379c811ad53939a830d75c949cd12
+receive.py sha256: 4bd5f894f3c0aa88116f7adfc26bd458fdd7f493870f8eb4e0b3966e0de51b28
+*** Compiling tunnel.p4
+*** Configuring hosts
+h1 h2 h3 
+*** Starting controller
+
+*** Starting 2 switches
+s1 s2 
+*** s1: 6 table entries added
+*** s2: 6 table entries added
+
+$ ./p4cli s2 table_dump MyIngress.myTunnel_exact
+Done
+==========
+TABLE ENTRIES
+**********
+Dumping entry 0x0
+Match key:
+* myTunnel.dst_id     : EXACT     0001
+Action entry: MyIngress.myTunnel_forward - 01
+**********
+Dumping entry 0x1
+Match key:
+* myTunnel.dst_id     : EXACT     0002
+Action entry: MyIngress.myTunnel_forward - 02
+**********
+Dumping entry 0x2
+Match key:
+* myTunnel.dst_id     : EXACT     0003
+Action entry: MyIngress.myTunnel_forward - 03
+==========
+Dumping default entry
+Action entry: MyIngress.drop - 
+==========
+Packet-processing counts: {"s1": 0, "s2": 0}
+
+$ ./p4cli s2 table_modify MyIngress.myTunnel_exact MyIngress.myTunnel_forward 2 1
+Done
+Modifying entry 2 for exact match table MyIngress.myTunnel_exact
+
+mininet> h1 python3 send.py 10.41.0.3 loop --tunnel 3 --hops 8
+###[ Ethernet ]### 
+  dst       = ff:ff:ff:ff:ff:ff
+  src       = 00:00:00:00:00:01
+  type      = 0x1212
+###[ MyTunnel ]### 
+     proto_id  = 2048
+     dst_id    = 3
+     hop_limit = 8
+###[ IP ]### 
+        version   = 4
+        ihl       = 5
+        tos       = 0x0
+        len       = 32
+        id        = 1
+        flags     = 
+        frag      = 0
+        ttl       = 64
+        proto     = udp
+        chksum    = 0x6677
+        src       = 10.41.0.1
+        dst       = 10.41.0.3
+        \options   \
+###[ UDP ]### 
+           sport     = 4321
+           dport     = 4321
+           len       = 12
+           chksum    = 0xedde
+###[ Raw ]### 
+              load      = 'loop'
+
+Sent from h1-eth0.
+Packet-processing counts: {"s1": 4, "s2": 4}
+Waiting 5 seconds before measuring again...
+Packet-processing counts: {"s1": 4, "s2": 4}
+
+$ ./p4cli s2 table_modify MyIngress.myTunnel_exact MyIngress.myTunnel_forward 2 3
+Done
+Modifying entry 2 for exact match table MyIngress.myTunnel_exact
+Loop measurements: {"baseline": {"s1": 0, "s2": 0}, "first": {"s1": 4, "s2": 4}, "second": {"s1": 4, "s2": 4}, "delta": {"s1": 4, "s2": 4}}
+
+== s2 log excerpt ==
+[15:38:51.239] [bmv2] [D] [thread 13285] [0.0] [cxt 0] Parser 'parser' entering state 'start'
+[15:38:51.239] [bmv2] [D] [thread 13285] [0.0] [cxt 0] Extracting header 'ethernet'
+[15:38:51.239] [bmv2] [D] [thread 13285] [0.0] [cxt 0] Parser state 'start': key is 1212
+[15:38:51.239] [bmv2] [T] [thread 13285] [0.0] [cxt 0] Bytes parsed: 14
+[15:38:51.239] [bmv2] [D] [thread 13285] [0.0] [cxt 0] Parser 'parser' entering state 'parse_myTunnel'
+[15:38:51.239] [bmv2] [D] [thread 13285] [0.0] [cxt 0] Extracting header 'myTunnel'
+[15:38:51.239] [bmv2] [D] [thread 13285] [0.0] [cxt 0] Parser state 'parse_myTunnel': key is 0800
+[15:38:51.239] [bmv2] [T] [thread 13285] [0.0] [cxt 0] Bytes parsed: 19
+[15:38:51.239] [bmv2] [D] [thread 13285] [0.0] [cxt 0] Parser 'parser' entering state 'parse_ipv4'
+[15:38:51.239] [bmv2] [D] [thread 13285] [0.0] [cxt 0] Extracting header 'ipv4'
+[15:38:51.239] [bmv2] [D] [thread 13285] [0.0] [cxt 0] Parser state 'parse_ipv4' has no switch, going to default next state
+[15:38:51.239] [bmv2] [T] [thread 13285] [0.0] [cxt 0] Bytes parsed: 39
+[15:38:51.239] [bmv2] [D] [thread 13285] [0.0] [cxt 0] Parser 'parser': end
+[15:38:51.239] [bmv2] [D] [thread 13285] [0.0] [cxt 0] Pipeline 'ingress': start
+[15:38:51.239] [bmv2] [T] [thread 13285] [0.0] [cxt 0] tunnel.p4(119) Condition "hdr.myTunnel.isValid()" (node_2) is true
+[15:38:51.239] [bmv2] [T] [thread 13285] [0.0] [cxt 0] tunnel.p4(121) Condition "hdr.myTunnel.hop_limit <= 1" (node_3) is false
+[15:38:51.239] [bmv2] [T] [thread 13285] [0.0] [cxt 0] Applying table 'tbl_tunnel124'
+[15:38:51.239] [bmv2] [D] [thread 13285] [0.0] [cxt 0] Looking up key:
+
+[15:38:51.239] [bmv2] [D] [thread 13285] [0.0] [cxt 0] Table 'tbl_tunnel124': miss
+[15:38:51.239] [bmv2] [D] [thread 13285] [0.0] [cxt 0] Action entry is tunnel124 - 
+[15:38:51.239] [bmv2] [T] [thread 13285] [0.0] [cxt 0] Action tunnel124
+[15:38:51.239] [bmv2] [T] [thread 13285] [0.0] [cxt 0] tunnel.p4(124) Primitive hdr.myTunnel.hop_limit = hdr.myTunnel.hop_limit - 1
+[15:38:51.239] [bmv2] [T] [thread 13285] [0.0] [cxt 0] Applying table 'MyIngress.myTunnel_exact'
+[15:38:51.239] [bmv2] [D] [thread 13285] [0.0] [cxt 0] Looking up key:
+* hdr.myTunnel.dst_id : 0003
+
+[15:38:51.239] [bmv2] [D] [thread 13285] [0.0] [cxt 0] Table 'MyIngress.myTunnel_exact': hit with handle 2
+[15:38:51.239] [bmv2] [D] [thread 13285] [0.0] [cxt 0] Dumping entry 2
+Match key:
+* hdr.myTunnel.dst_id : EXACT     0003
+Action entry: MyIngress.myTunnel_forward - 1,
+
+[15:38:51.239] [bmv2] [D] [thread 13285] [0.0] [cxt 0] Action entry is MyIngress.myTunnel_forward - 1,
+[15:38:51.239] [bmv2] [T] [thread 13285] [0.0] [cxt 0] Action MyIngress.myTunnel_forward
+[15:38:51.239] [bmv2] [T] [thread 13285] [0.0] [cxt 0] tunnel.p4(108) Primitive standard_metadata.egress_spec = port
+[15:38:51.239] [bmv2] [D] [thread 13285] [0.0] [cxt 0] Pipeline 'ingress': end
+[15:38:51.239] [bmv2] [D] [thread 13285] [0.0] [cxt 0] Egress port is 1
+[15:38:51.240] [bmv2] [D] [thread 13287] [0.0] [cxt 0] Pipeline 'egress': start
+[15:38:51.240] [bmv2] [D] [thread 13287] [0.0] [cxt 0] Pipeline 'egress': end
+[15:38:51.240] [bmv2] [D] [thread 13287] [0.0] [cxt 0] Deparser 'deparser': start
+[15:38:51.240] [bmv2] [D] [thread 13287] [0.0] [cxt 0] Updating checksum 'cksum'
+[15:38:51.240] [bmv2] [D] [thread 13287] [0.0] [cxt 0] Deparsing header 'ethernet'
+[15:38:51.240] [bmv2] [D] [thread 13287] [0.0] [cxt 0] Deparsing header 'myTunnel'
+[15:38:51.240] [bmv2] [D] [thread 13287] [0.0] [cxt 0] Deparsing header 'ipv4'
+[15:38:51.240] [bmv2] [D] [thread 13287] [0.0] [cxt 0] Deparser 'deparser': end
+[15:38:51.240] [bmv2] [D] [thread 13290] [0.0] [cxt 0] Transmitting packet of size 51 out of port 1
+[15:38:51.245] [bmv2] [D] [thread 13285] [1.0] [cxt 0] Processing packet received on port 1
+[15:38:51.245] [bmv2] [D] [thread 13285] [1.0] [cxt 0] Parser 'parser': start
+[15:38:51.245] [bmv2] [D] [thread 13285] [1.0] [cxt 0] Parser 'parser' entering state 'start'
+[15:38:51.245] [bmv2] [D] [thread 13285] [1.0] [cxt 0] Extracting header 'ethernet'
+[15:38:51.245] [bmv2] [D] [thread 13285] [1.0] [cxt 0] Parser state 'start': key is 1212
+[15:38:51.245] [bmv2] [T] [thread 13285] [1.0] [cxt 0] Bytes parsed: 14
+[15:38:51.245] [bmv2] [D] [thread 13285] [1.0] [cxt 0] Parser 'parser' entering state 'parse_myTunnel'
+[15:38:51.245] [bmv2] [D] [thread 13285] [1.0] [cxt 0] Extracting header 'myTunnel'
+[15:38:51.245] [bmv2] [D] [thread 13285] [1.0] [cxt 0] Parser state 'parse_myTunnel': key is 0800
+[15:38:51.245] [bmv2] [T] [thread 13285] [1.0] [cxt 0] Bytes parsed: 19
+[15:38:51.245] [bmv2] [D] [thread 13285] [1.0] [cxt 0] Parser 'parser' entering state 'parse_ipv4'
+[15:38:51.245] [bmv2] [D] [thread 13285] [1.0] [cxt 0] Extracting header 'ipv4'
+[15:38:51.245] [bmv2] [D] [thread 13285] [1.0] [cxt 0] Parser state 'parse_ipv4' has no switch, going to default next state
+[15:38:51.245] [bmv2] [T] [thread 13285] [1.0] [cxt 0] Bytes parsed: 39
+[15:38:51.245] [bmv2] [D] [thread 13285] [1.0] [cxt 0] Parser 'parser': end
+[15:38:51.245] [bmv2] [D] [thread 13285] [1.0] [cxt 0] Pipeline 'ingress': start
+[15:38:51.245] [bmv2] [T] [thread 13285] [1.0] [cxt 0] tunnel.p4(119) Condition "hdr.myTunnel.isValid()" (node_2) is true
+[15:38:51.245] [bmv2] [T] [thread 13285] [1.0] [cxt 0] tunnel.p4(121) Condition "hdr.myTunnel.hop_limit <= 1" (node_3) is false
+[15:38:51.245] [bmv2] [T] [thread 13285] [1.0] [cxt 0] Applying table 'tbl_tunnel124'
+[15:38:51.245] [bmv2] [D] [thread 13285] [1.0] [cxt 0] Looking up key:
+*** Stopping 0 controllers
+
+*** Stopping 4 links
+....
+*** Stopping 2 switches
+s1 s2 
+*** Stopping 3 hosts
+h1 h2 h3 
+*** Done
+
+PASS: loop-after

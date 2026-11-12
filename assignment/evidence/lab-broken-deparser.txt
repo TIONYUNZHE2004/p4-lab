@@ -1,0 +1,130 @@
+UTC: 2026-11-12T15:38:06.265262+00:00
+Student ID suffix: 4941
+tunnel.p4 sha256: 12af576d80148e4207f5cb5d244f6169e091022fe8a2685c381c36b487a040f6
+tunnel_v1.p4 sha256: 8cb86238da849f4feb7e006eabc3a12f068ca5404c645f793a5b8678b4e04770
+send.py sha256: 6ad47a58cbe6f44d180a2523973b80fed55379c811ad53939a830d75c949cd12
+receive.py sha256: 4bd5f894f3c0aa88116f7adfc26bd458fdd7f493870f8eb4e0b3966e0de51b28
+*** Compiling build/tunnel_without_emit.p4
+*** Configuring hosts
+h1 h2 h3 
+*** Starting controller
+
+*** Starting 2 switches
+s1 s2 
+*** s1: 6 table entries added
+*** s2: 6 table entries added
+
+mininet> h1 python3 assignment/legacy/send_v1.py 10.41.0.3 "test 4" --tunnel 2
+###[ Ethernet ]### 
+  dst       = ff:ff:ff:ff:ff:ff
+  src       = 00:00:00:00:00:01
+  type      = 0x1212
+###[ MyTunnel ]### 
+     proto_id  = 2048
+     dst_id    = 2
+###[ IP ]### 
+        version   = 4
+        ihl       = 5
+        tos       = 0x0
+        len       = 34
+        id        = 1
+        flags     = 
+        frag      = 0
+        ttl       = 64
+        proto     = udp
+        chksum    = 0x6675
+        src       = 10.41.0.1
+        dst       = 10.41.0.3
+        \options   \
+###[ UDP ]### 
+           sport     = 4321
+           dport     = 4321
+           len       = 14
+           chksum    = 0xc1ac
+###[ Raw ]### 
+              load      = 'test 4'
+
+Sent from h1-eth0.
+
+== logs/h2.txt ==
+Listening on h2-eth0...
+
+
+== logs/h3.txt ==
+Listening on h3-eth0...
+
+
+== s1 log excerpt ==
+[15:38:11.275] [bmv2] [D] [thread 12451] [0.0] [cxt 0] Parser 'parser' entering state 'start'
+[15:38:11.275] [bmv2] [D] [thread 12451] [0.0] [cxt 0] Extracting header 'ethernet'
+[15:38:11.275] [bmv2] [D] [thread 12451] [0.0] [cxt 0] Parser state 'start': key is 1212
+[15:38:11.275] [bmv2] [T] [thread 12451] [0.0] [cxt 0] Bytes parsed: 14
+[15:38:11.275] [bmv2] [D] [thread 12451] [0.0] [cxt 0] Parser 'parser' entering state 'parse_myTunnel'
+[15:38:11.275] [bmv2] [D] [thread 12451] [0.0] [cxt 0] Extracting header 'myTunnel'
+[15:38:11.275] [bmv2] [D] [thread 12451] [0.0] [cxt 0] Parser state 'parse_myTunnel': key is 0800
+[15:38:11.275] [bmv2] [T] [thread 12451] [0.0] [cxt 0] Bytes parsed: 18
+[15:38:11.275] [bmv2] [D] [thread 12451] [0.0] [cxt 0] Parser 'parser' entering state 'parse_ipv4'
+[15:38:11.275] [bmv2] [D] [thread 12451] [0.0] [cxt 0] Extracting header 'ipv4'
+[15:38:11.275] [bmv2] [D] [thread 12451] [0.0] [cxt 0] Parser state 'parse_ipv4' has no switch, going to default next state
+[15:38:11.275] [bmv2] [T] [thread 12451] [0.0] [cxt 0] Bytes parsed: 38
+[15:38:11.275] [bmv2] [D] [thread 12451] [0.0] [cxt 0] Parser 'parser': end
+[15:38:11.276] [bmv2] [D] [thread 12451] [0.0] [cxt 0] Pipeline 'ingress': start
+[15:38:11.276] [bmv2] [T] [thread 12451] [0.0] [cxt 0] build/tunnel_without_emit.p4(118) Condition "hdr.myTunnel.isValid()" (node_2) is true
+[15:38:11.276] [bmv2] [T] [thread 12451] [0.0] [cxt 0] Applying table 'MyIngress.myTunnel_exact'
+[15:38:11.276] [bmv2] [D] [thread 12451] [0.0] [cxt 0] Looking up key:
+* hdr.myTunnel.dst_id : 0002
+
+[15:38:11.276] [bmv2] [D] [thread 12451] [0.0] [cxt 0] Table 'MyIngress.myTunnel_exact': hit with handle 1
+[15:38:11.276] [bmv2] [D] [thread 12451] [0.0] [cxt 0] Dumping entry 1
+Match key:
+* hdr.myTunnel.dst_id : EXACT     0002
+Action entry: MyIngress.myTunnel_forward - 2,
+
+[15:38:11.276] [bmv2] [D] [thread 12451] [0.0] [cxt 0] Action entry is MyIngress.myTunnel_forward - 2,
+[15:38:11.276] [bmv2] [T] [thread 12451] [0.0] [cxt 0] Action MyIngress.myTunnel_forward
+[15:38:11.276] [bmv2] [T] [thread 12451] [0.0] [cxt 0] build/tunnel_without_emit.p4(107) Primitive standard_metadata.egress_spec = port
+[15:38:11.276] [bmv2] [D] [thread 12451] [0.0] [cxt 0] Pipeline 'ingress': end
+[15:38:11.276] [bmv2] [D] [thread 12451] [0.0] [cxt 0] Egress port is 2
+[15:38:11.276] [bmv2] [D] [thread 12454] [0.0] [cxt 0] Pipeline 'egress': start
+[15:38:11.276] [bmv2] [D] [thread 12454] [0.0] [cxt 0] Pipeline 'egress': end
+[15:38:11.276] [bmv2] [D] [thread 12454] [0.0] [cxt 0] Deparser 'deparser': start
+[15:38:11.276] [bmv2] [D] [thread 12454] [0.0] [cxt 0] Updating checksum 'cksum'
+[15:38:11.276] [bmv2] [D] [thread 12454] [0.0] [cxt 0] Deparsing header 'ethernet'
+[15:38:11.276] [bmv2] [D] [thread 12454] [0.0] [cxt 0] Deparsing header 'ipv4'
+[15:38:11.276] [bmv2] [D] [thread 12454] [0.0] [cxt 0] Deparser 'deparser': end
+[15:38:11.276] [bmv2] [D] [thread 12456] [0.0] [cxt 0] Transmitting packet of size 48 out of port 2
+
+== s2 log excerpt ==
+[15:38:11.277] [bmv2] [D] [thread 12471] [0.0] [cxt 0] Parser 'parser' entering state 'start'
+[15:38:11.277] [bmv2] [D] [thread 12471] [0.0] [cxt 0] Extracting header 'ethernet'
+[15:38:11.277] [bmv2] [D] [thread 12471] [0.0] [cxt 0] Parser state 'start': key is 1212
+[15:38:11.277] [bmv2] [T] [thread 12471] [0.0] [cxt 0] Bytes parsed: 14
+[15:38:11.277] [bmv2] [D] [thread 12471] [0.0] [cxt 0] Parser 'parser' entering state 'parse_myTunnel'
+[15:38:11.277] [bmv2] [D] [thread 12471] [0.0] [cxt 0] Extracting header 'myTunnel'
+[15:38:11.277] [bmv2] [D] [thread 12471] [0.0] [cxt 0] Parser state 'parse_myTunnel': key is 4500
+[15:38:11.277] [bmv2] [T] [thread 12471] [0.0] [cxt 0] Bytes parsed: 18
+[15:38:11.277] [bmv2] [D] [thread 12471] [0.0] [cxt 0] Parser 'parser': end
+[15:38:11.277] [bmv2] [D] [thread 12471] [0.0] [cxt 0] Pipeline 'ingress': start
+[15:38:11.277] [bmv2] [T] [thread 12471] [0.0] [cxt 0] build/tunnel_without_emit.p4(118) Condition "hdr.myTunnel.isValid()" (node_2) is true
+[15:38:11.277] [bmv2] [T] [thread 12471] [0.0] [cxt 0] Applying table 'MyIngress.myTunnel_exact'
+[15:38:11.277] [bmv2] [D] [thread 12471] [0.0] [cxt 0] Looking up key:
+* hdr.myTunnel.dst_id : 0022
+
+[15:38:11.277] [bmv2] [D] [thread 12471] [0.0] [cxt 0] Table 'MyIngress.myTunnel_exact': miss
+[15:38:11.277] [bmv2] [D] [thread 12471] [0.0] [cxt 0] Action entry is MyIngress.drop - 
+[15:38:11.277] [bmv2] [T] [thread 12471] [0.0] [cxt 0] Action MyIngress.drop
+[15:38:11.277] [bmv2] [T] [thread 12471] [0.0] [cxt 0] build/tunnel_without_emit.p4(91) Primitive mark_to_drop(standard_metadata)
+[15:38:11.277] [bmv2] [D] [thread 12471] [0.0] [cxt 0] Pipeline 'ingress': end
+[15:38:11.277] [bmv2] [D] [thread 12471] [0.0] [cxt 0] Egress port is 511
+[15:38:11.277] [bmv2] [D] [thread 12471] [0.0] [cxt 0] Dropping packet at the end of ingress
+*** Stopping 0 controllers
+
+*** Stopping 4 links
+....
+*** Stopping 2 switches
+s1 s2 
+*** Stopping 3 hosts
+h1 h2 h3 
+*** Done
+
+PASS: lab-broken-deparser
