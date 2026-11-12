@@ -1,0 +1,22 @@
+{
+  "phase": "loop-after",
+  "addresses": "10.41.0.0/16",
+  "loop": {
+    "baseline": {
+      "s1": 0,
+      "s2": 0
+    },
+    "first": {
+      "s1": 4,
+      "s2": 4
+    },
+    "second": {
+      "s1": 4,
+      "s2": 4
+    },
+    "delta": {
+      "s1": 4,
+      "s2": 4
+    }
+  }
+}

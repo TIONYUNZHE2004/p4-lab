@@ -1,0 +1,8 @@
+{
+  "phase": "lab-broken-deparser",
+  "addresses": "10.41.0.0/16",
+  "receivers": {
+    "h2": "Listening on h2-eth0...\n",
+    "h3": "Listening on h3-eth0...\n"
+  }
+}

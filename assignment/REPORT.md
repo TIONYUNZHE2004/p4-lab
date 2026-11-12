@@ -1,11 +1,11 @@
 # Week 5 assignment — Put a limit on the tunnel
 
-Student ID (last 4 digits only): **Pending Codespace experiment — run assignment/run_checks.py**
+Student ID (last 4 digits only): **4941**
 
 The experiments use my own address block, `10.41.0.0/16`, in the course Codespace.
 `assignment/run_checks.py` runs the supplied topology and records the commands and real
 outputs. It stops if a required check fails. The transcripts include UTC timestamps and
-hashes of the programs used. Report generated after the checks: Pending Codespace experiment — run assignment/run_checks.py.
+hashes of the programs used. Report generated after the checks: 2026-11-12T15:39:11.602986+00:00.
 
 ## 1. Analysis: the loop
 
@@ -20,8 +20,8 @@ on port 2 towards s2. A packet therefore follows `s1 → s2 → s1 → …`.
 The exact dump, handle, modification and sender command are in
 [`loop-before.txt`](evidence/loop-before.txt).
 
-After one second the processing counts were `Pending Codespace experiment — run assignment/run_checks.py`. After another five
-seconds they were `Pending Codespace experiment — run assignment/run_checks.py`. Both increased: the original tunnel has no
+After one second the processing counts were `{"s1": 305, "s2": 307}`. After another five
+seconds they were `{"s1": 1557, "s2": 1560}`. Both increased: the original tunnel has no
 counter that can end this loop. I restored the exit-3 entry before stopping the network.
 
 The IPv4 action subtracts one from TTL, but this program **does not check TTL before
@@ -76,8 +76,11 @@ The following are copied directly from this run's receiver logs in
 [`delivery.txt`](evidence/delivery.txt):
 
 ```text
-Pending Codespace experiment — run assignment/run_checks.py
-Pending Codespace experiment — run assignment/run_checks.py
+Listening on h2-eth0...
+Received (tunnelled, dst_id=2, hop_limit=6) from 10.41.0.1 to 10.41.0.3, TTL 64: 'delivery-h2'
+Listening on h3-eth0...
+Received (tunnelled, dst_id=3, hop_limit=6) from 10.41.0.1 to 10.41.0.3, TTL 64: 'delivery-h3'
+Received (tunnelled, dst_id=3, hop_limit=1) from 10.41.0.1 to 10.41.0.3, TTL 64: 'minimum-delivery'
 ```
 
 Both normal tunnel deliveries start at 8 and arrive with hop limit 6 after s1 and
@@ -88,11 +91,17 @@ sender commands and receiver outputs for these boundary cases are in the same fi
 The plain IPv4 check also succeeds:
 
 ```text
-Pending Codespace experiment — run assignment/run_checks.py
+PING 10.41.0.3 (10.41.0.3) 56(84) bytes of data.
+64 bytes from 10.41.0.3: icmp_seq=1 ttl=62 time=29.2 ms
+64 bytes from 10.41.0.3: icmp_seq=2 ttl=62 time=7.59 ms
+
+--- 10.41.0.3 ping statistics ---
+2 packets transmitted, 2 received, 0% packet loss, time 1001ms
+rtt min/avg/max/mdev = 7.591/18.417/29.243/10.826 ms
 ```
 
 With both switches upgraded, the loop's per-switch count increase is
-`Pending Codespace experiment — run assignment/run_checks.py`, eight visits in total. The two count samples five seconds apart
+`{"s1": 4, "s2": 4}`, eight visits in total. The two count samples five seconds apart
 are identical. The eighth visit drops the packet at hop limit 1, as designed. See
 [`loop-after.txt`](evidence/loop-after.txt) for the counts and drop trace.
 
@@ -103,13 +112,22 @@ are identical. The eighth visit drops the packet at hop limit 1, as designed. Se
 The following prediction is saved in the repository and written to the evidence
 before the mixed network starts:
 
-> Pending Codespace experiment — run assignment/run_checks.py
+> Prediction recorded before this mixed experiment: the new hop_limit is appended after proto_id and dst_id. The old s2 still reads dst_id correctly and should forward by the tunnel table, but its IPv4 parser starts one byte too early. Its checksum rewrite can therefore damage the real IPv4 header. A frame may reach h2 without the UDP receiver accepting it. In the loop, only s1 decrements the new field. With an initial value of 8 and a drop at <=1, I expect 8 visits to s1 and 7 to s2 (15 total), rather than 8 total with two upgraded switches.
 
 The experiment runs s1 with `tunnel.p4` and s2 with `tunnel_v1.p4`.
-Pending Codespace experiment — run assignment/run_checks.py The following capture shows what actually reached h2:
+The UDP receiver did not record the mixed packet. The following capture shows what actually reached h2:
 
 ```text
-Pending Codespace experiment — run assignment/run_checks.py
+tcpdump: verbose output suppressed, use -v[v]... for full protocol decode
+listening on h2-eth0, link-type EN10MB (Ethernet), snapshot length 262144 bytes
+15:39:03.888155 00:00:00:00:00:01 > ff:ff:ff:ff:ff:ff, ethertype Unknown (0x1212), length 52: 
+	0x0000:  ffff ffff ffff 0000 0000 0001 1212 0800  ................
+	0x0010:  0002 0745 0000 2100 0100 0040 0d66 760a  ...E..!....@.fv.
+	0x0020:  2900 010a 2900 0310 e110 e100 0d7f ed6d  )...)..........m
+	0x0030:  6978 6564                                ixed
+1 packet captured
+1 packet received by filter
+0 packets dropped by kernel
 ```
 
 In the new header the bytes after Ethernet are `08 00 00 02 07` after s1:
@@ -121,7 +139,7 @@ IPv4 header this can change the protocol byte and a checksum byte. The raw captu
 receiver output and s2's parser trace distinguish a frame reaching h2 from successful
 UDP delivery. Preserving the old tunnel lookup fields alone is therefore insufficient.
 
-In the mixed loop, the measured increases are `Pending Codespace experiment — run assignment/run_checks.py`, fifteen visits in
+In the mixed loop, the measured increases are `{"s1": 8, "s2": 7}`, fifteen visits in
 total. This matches the prediction: s1 decrements on its visits and eventually drops;
 s2 does not enforce the new limit. The samples stop growing. This protection depends
 on the loop continuing to cross an upgraded switch; a loop containing only old

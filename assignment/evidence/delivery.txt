@@ -1,0 +1,244 @@
+UTC: 2026-11-12T15:38:27.356683+00:00
+Student ID suffix: 4941
+tunnel.p4 sha256: 12af576d80148e4207f5cb5d244f6169e091022fe8a2685c381c36b487a040f6
+tunnel_v1.p4 sha256: 8cb86238da849f4feb7e006eabc3a12f068ca5404c645f793a5b8678b4e04770
+send.py sha256: 6ad47a58cbe6f44d180a2523973b80fed55379c811ad53939a830d75c949cd12
+receive.py sha256: 4bd5f894f3c0aa88116f7adfc26bd458fdd7f493870f8eb4e0b3966e0de51b28
+*** Compiling tunnel.p4
+*** Configuring hosts
+h1 h2 h3 
+*** Starting controller
+
+*** Starting 2 switches
+s1 s2 
+*** s1: 6 table entries added
+*** s2: 6 table entries added
+
+mininet> h1 python3 send.py 10.41.0.3 "delivery-h2" --tunnel 2 --hops 8
+###[ Ethernet ]### 
+  dst       = ff:ff:ff:ff:ff:ff
+  src       = 00:00:00:00:00:01
+  type      = 0x1212
+###[ MyTunnel ]### 
+     proto_id  = 2048
+     dst_id    = 2
+     hop_limit = 8
+###[ IP ]### 
+        version   = 4
+        ihl       = 5
+        tos       = 0x0
+        len       = 39
+        id        = 1
+        flags     = 
+        frag      = 0
+        ttl       = 64
+        proto     = udp
+        chksum    = 0x6670
+        src       = 10.41.0.1
+        dst       = 10.41.0.3
+        \options   \
+###[ UDP ]### 
+           sport     = 4321
+           dport     = 4321
+           len       = 19
+           chksum    = 0xb09a
+###[ Raw ]### 
+              load      = 'delivery-h2'
+
+Sent from h1-eth0.
+
+mininet> h1 python3 send.py 10.41.0.3 "delivery-h3" --tunnel 3 --hops 8
+###[ Ethernet ]### 
+  dst       = ff:ff:ff:ff:ff:ff
+  src       = 00:00:00:00:00:01
+  type      = 0x1212
+###[ MyTunnel ]### 
+     proto_id  = 2048
+     dst_id    = 3
+     hop_limit = 8
+###[ IP ]### 
+        version   = 4
+        ihl       = 5
+        tos       = 0x0
+        len       = 39
+        id        = 1
+        flags     = 
+        frag      = 0
+        ttl       = 64
+        proto     = udp
+        chksum    = 0x6670
+        src       = 10.41.0.1
+        dst       = 10.41.0.3
+        \options   \
+###[ UDP ]### 
+           sport     = 4321
+           dport     = 4321
+           len       = 19
+           chksum    = 0xaf9a
+###[ Raw ]### 
+              load      = 'delivery-h3'
+
+Sent from h1-eth0.
+
+mininet> h1 python3 send.py 10.41.0.3 "zero-must-drop" --tunnel 3 --hops 0
+###[ Ethernet ]### 
+  dst       = ff:ff:ff:ff:ff:ff
+  src       = 00:00:00:00:00:01
+  type      = 0x1212
+###[ MyTunnel ]### 
+     proto_id  = 2048
+     dst_id    = 3
+     hop_limit = 0
+###[ IP ]### 
+        version   = 4
+        ihl       = 5
+        tos       = 0x0
+        len       = 42
+        id        = 1
+        flags     = 
+        frag      = 0
+        ttl       = 64
+        proto     = udp
+        chksum    = 0x666d
+        src       = 10.41.0.1
+        dst       = 10.41.0.3
+        \options   \
+###[ UDP ]### 
+           sport     = 4321
+           dport     = 4321
+           len       = 22
+           chksum    = 0xf1e4
+###[ Raw ]### 
+              load      = 'zero-must-drop'
+
+Sent from h1-eth0.
+
+mininet> h1 python3 send.py 10.41.0.3 "one-must-drop" --tunnel 3 --hops 1
+###[ Ethernet ]### 
+  dst       = ff:ff:ff:ff:ff:ff
+  src       = 00:00:00:00:00:01
+  type      = 0x1212
+###[ MyTunnel ]### 
+     proto_id  = 2048
+     dst_id    = 3
+     hop_limit = 1
+###[ IP ]### 
+        version   = 4
+        ihl       = 5
+        tos       = 0x0
+        len       = 41
+        id        = 1
+        flags     = 
+        frag      = 0
+        ttl       = 64
+        proto     = udp
+        chksum    = 0x666e
+        src       = 10.41.0.1
+        dst       = 10.41.0.3
+        \options   \
+###[ UDP ]### 
+           sport     = 4321
+           dport     = 4321
+           len       = 21
+           chksum    = 0x453
+###[ Raw ]### 
+              load      = 'one-must-drop'
+
+Sent from h1-eth0.
+
+mininet> h1 python3 send.py 10.41.0.3 "two-must-drop" --tunnel 3 --hops 2
+###[ Ethernet ]### 
+  dst       = ff:ff:ff:ff:ff:ff
+  src       = 00:00:00:00:00:01
+  type      = 0x1212
+###[ MyTunnel ]### 
+     proto_id  = 2048
+     dst_id    = 3
+     hop_limit = 2
+###[ IP ]### 
+        version   = 4
+        ihl       = 5
+        tos       = 0x0
+        len       = 41
+        id        = 1
+        flags     = 
+        frag      = 0
+        ttl       = 64
+        proto     = udp
+        chksum    = 0x666e
+        src       = 10.41.0.1
+        dst       = 10.41.0.3
+        \options   \
+###[ UDP ]### 
+           sport     = 4321
+           dport     = 4321
+           len       = 21
+           chksum    = 0xf549
+###[ Raw ]### 
+              load      = 'two-must-drop'
+
+Sent from h1-eth0.
+
+mininet> h1 python3 send.py 10.41.0.3 "minimum-delivery" --tunnel 3 --hops 3
+###[ Ethernet ]### 
+  dst       = ff:ff:ff:ff:ff:ff
+  src       = 00:00:00:00:00:01
+  type      = 0x1212
+###[ MyTunnel ]### 
+     proto_id  = 2048
+     dst_id    = 3
+     hop_limit = 3
+###[ IP ]### 
+        version   = 4
+        ihl       = 5
+        tos       = 0x0
+        len       = 44
+        id        = 1
+        flags     = 
+        frag      = 0
+        ttl       = 64
+        proto     = udp
+        chksum    = 0x666b
+        src       = 10.41.0.1
+        dst       = 10.41.0.3
+        \options   \
+###[ UDP ]### 
+           sport     = 4321
+           dport     = 4321
+           len       = 24
+           chksum    = 0x5983
+###[ Raw ]### 
+              load      = 'minimum-delivery'
+
+Sent from h1-eth0.
+
+== logs/h2.txt ==
+Listening on h2-eth0...
+Received (tunnelled, dst_id=2, hop_limit=6) from 10.41.0.1 to 10.41.0.3, TTL 64: 'delivery-h2'
+
+
+== logs/h3.txt ==
+Listening on h3-eth0...
+Received (tunnelled, dst_id=3, hop_limit=6) from 10.41.0.1 to 10.41.0.3, TTL 64: 'delivery-h3'
+Received (tunnelled, dst_id=3, hop_limit=1) from 10.41.0.1 to 10.41.0.3, TTL 64: 'minimum-delivery'
+
+
+mininet> h1 ping -c 2 -W 1 h3
+PING 10.41.0.3 (10.41.0.3) 56(84) bytes of data.
+64 bytes from 10.41.0.3: icmp_seq=1 ttl=62 time=29.2 ms
+64 bytes from 10.41.0.3: icmp_seq=2 ttl=62 time=7.59 ms
+
+--- 10.41.0.3 ping statistics ---
+2 packets transmitted, 2 received, 0% packet loss, time 1001ms
+rtt min/avg/max/mdev = 7.591/18.417/29.243/10.826 ms
+*** Stopping 0 controllers
+
+*** Stopping 4 links
+....
+*** Stopping 2 switches
+s1 s2 
+*** Stopping 3 hosts
+h1 h2 h3 
+*** Done
+
+PASS: delivery
