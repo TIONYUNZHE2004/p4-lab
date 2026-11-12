@@ -59,3 +59,23 @@ assignment's mixed-rollout experiment.
 - **Save your work**: commit and push from the codespace (Source Control panel, or `git` in the
   terminal) — it goes to your own repository.
 - **When you've finished the lab**, delete the codespace at github.com/codespaces so it stops using your storage quota.
+
+## Reproduce the hop-limit experiments
+
+On the `hop-limit` branch, use the course Codespace and first exit any interactive
+Mininet session. From the repository root, run:
+
+```bash
+python3 assignment/run_checks.py --id 4941
+```
+
+The runner compiles the old and new programs, starts fresh instances of the supplied
+topology, and saves real command output in `assignment/evidence/`. It covers the
+finished lab, the missing-deparser experiment, the original loop, tunnel delivery
+and hop-limit boundary cases, the bounded loop, the mixed old/new rollout, and plain
+IPv4 ping. A failure stops the run. After all checks pass it fills
+`assignment/REPORT.md` from these measurements. The submitted report and evidence
+already contain the completed Codespace run.
+
+For a manual new-format packet, start `python3 topo.py --id 4941`, then use
+`h1 python3 send.py 10.41.0.3 "test" --tunnel 2 --hops 8` at `mininet>`.

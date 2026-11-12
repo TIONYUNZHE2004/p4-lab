@@ -116,8 +116,10 @@ In the new header the bytes after Ethernet are `08 00 00 02 07` after s1:
 `proto_id=0x0800`, `dst_id=2`, then remaining hop limit 7. s2's old parser consumes
 only the first four bytes as MyTunnel, so its IPv4 parser starts at `07` instead of
 the real IPv4 start byte `45`. It reads a false version/IHL and shifts all other
-IPv4 fields. Its checksum rewrite targets those incorrect positions; in the real
-IPv4 header this can change the protocol byte and a checksum byte. The raw capture,
+IPv4 fields. Its checksum rewrite targets those incorrect positions. In this run,
+the captured real IPv4 protocol byte is `0x0d`, instead of UDP's `0x11`. This explains
+why the UDP receiver does not print the packet even though the frame reaches h2.
+The rewrite overlaps the real protocol byte and the high checksum byte. The raw capture,
 receiver output and s2's parser trace distinguish a frame reaching h2 from successful
 UDP delivery. Preserving the old tunnel lookup fields alone is therefore insufficient.
 
